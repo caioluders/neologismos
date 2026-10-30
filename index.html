@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neologismos</title>
+<meta name="description" content="Gerador de palavras que ainda não existem em português.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0b16;
+    --fg: #f6f5ff;
+    --muted: #c3bfe4;
+    --accent: #ff6b9d;
+    --accent2: #7c5cff;
+    --accent3: #36d1dc;
+    --card: rgba(17,17,32,.72);
+    --stroke: rgba(255,255,255,.14);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--fg); min-height: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px 16px; text-align: center; overflow-x: hidden; position: relative;
+  }
+
+  /* aurora de fundo */
+  .aurora { position: fixed; inset: 0; z-index: -1; overflow: hidden; filter: blur(80px); opacity: .38; }
+  .aurora span { position: absolute; width: 50vmax; height: 50vmax; border-radius: 50%; mix-blend-mode: screen; animation: float 18s ease-in-out infinite; }
+  .aurora .a { background: var(--accent2); top: -15%; left: -10%; }
+  .aurora .b { background: var(--accent);  bottom: -20%; right: -10%; animation-delay: -6s; }
+  .aurora .c { background: var(--accent3); top: 30%; right: 20%; animation-delay: -12s; animation-duration: 24s; }
+  @keyframes float { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(6vw,8vh) scale(1.15); } 66% { transform: translate(-5vw,-6vh) scale(.9); } }
+  @media (prefers-reduced-motion: reduce) { .aurora span { animation: none; } }
+
+  h1 { font-family: "Sora", sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: #fff; margin: 0 0 34px; padding-left: .22em; }
+
+  .stage {
+    width: 100%; max-width: 680px; background: var(--card);
+    border: 1px solid var(--stroke); border-radius: 28px; padding: 48px 24px 36px;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 30px 80px rgba(0,0,0,.45);
+  }
+  .word {
+    font-family: "Sora", sans-serif; font-weight: 800; font-size: clamp(2.4rem, 11vw, 5rem);
+    line-height: 1.05; letter-spacing: -.02em; word-break: break-word; cursor: pointer; user-select: all;
+    background-image: linear-gradient(110deg, #7ff0ff, #c3b3ff 50%, #ff9ec6);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 2px 12px rgba(124,92,255,.25)); transition: transform .12s cubic-bezier(.2,.8,.2,1);
+  }
+  .word.pop { animation: pop .35s cubic-bezier(.2,.9,.25,1.3); }
+  .word.spin { opacity: .55; filter: blur(.6px); }
+  @keyframes pop { 0% { transform: scale(.92); opacity: .3; } 100% { transform: scale(1); opacity: 1; } }
+
+  .syll { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 18px; min-height: 28px; }
+  .syll span { font-size: .85rem; font-weight: 500; color: #e9e6ff; background: rgba(255,255,255,.10); border: 1px solid var(--stroke); border-radius: 8px; padding: 4px 10px; }
+
+  .actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+  .iconbtn {
+    width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--stroke);
+    background: rgba(255,255,255,.05); color: var(--fg); font-size: 1.1rem; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+    transition: transform .1s, background .2s, border-color .2s, color .2s;
+  }
+  .iconbtn:hover { background: rgba(255,255,255,.12); transform: translateY(-2px); }
+  .iconbtn:active { transform: scale(.92); }
+  .iconbtn.heart { color: var(--muted); font-size: 1.25rem; }
+  .iconbtn.heart.on { color: var(--accent); border-color: rgba(255,107,157,.5); background: rgba(255,107,157,.14); }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 26px; }
+  .field { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+  .field label { font-size: .65rem; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); padding-left: 4px; }
+  select {
+    appearance: none; -webkit-appearance: none; font: inherit; font-size: .9rem; font-weight: 500; color: var(--fg);
+    background: rgba(255,255,255,.05); border: 1px solid var(--stroke); border-radius: 12px;
+    padding: 11px 38px 11px 15px; cursor: pointer; transition: border-color .2s, background .2s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%239a96bd' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+  }
+  select:hover { background-color: rgba(255,255,255,.09); }
+  select:focus { outline: none; border-color: var(--accent2); }
+  select option { background: #16162a; color: var(--fg); }
+
+  button#btn {
+    margin-top: 30px; font-family: "Sora", sans-serif; font-size: 1.05rem; font-weight: 700; color: #fff;
+    border: none; border-radius: 999px; padding: 16px 46px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 10px;
+    background: linear-gradient(110deg, var(--accent2), var(--accent)); box-shadow: 0 12px 34px rgba(124,92,255,.45);
+    transition: transform .1s ease, box-shadow .25s ease, filter .25s ease;
+  }
+  button#btn:hover { transform: translateY(-2px); box-shadow: 0 18px 44px rgba(124,92,255,.55); filter: brightness(1.06); }
+  button#btn:active { transform: translateY(0) scale(.97); }
+  button#btn .dice { font-size: 1.15rem; transition: transform .4s ease; }
+  button#btn:hover .dice { transform: rotate(-20deg); }
+
+  .favs { margin-top: 30px; border-top: 1px solid var(--stroke); padding-top: 22px; display: none; }
+  .favs.show { display: block; }
+  .favs .flabel { font-size: .65rem; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .favlist { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .fav {
+    display: inline-flex; align-items: center; gap: 8px; font-size: .9rem; font-weight: 600;
+    color: var(--fg); background: rgba(255,255,255,.07); border: 1px solid var(--stroke);
+    border-radius: 999px; padding: 6px 8px 6px 14px; cursor: pointer; transition: background .2s;
+  }
+  .fav:hover { background: rgba(255,255,255,.13); }
+  .fav .x { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--muted); background: rgba(255,255,255,.06); }
+  .fav .x:hover { color: var(--accent); background: rgba(255,107,157,.18); }
+
+  footer { margin-top: 30px; color: var(--muted); font-size: .78rem; line-height: 1.6; max-width: 520px; }
+
+  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(20,20,36,.92); border: 1px solid var(--stroke); color: var(--fg); padding: 10px 18px; border-radius: 999px; font-size: .85rem; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; backdrop-filter: blur(8px); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* sidebar de histórico */
+  #histToggle {
+    position: fixed; top: 18px; left: 18px; z-index: 30; font-family: "Sora", sans-serif;
+    font-size: .8rem; font-weight: 600; color: var(--fg); background: rgba(17,17,32,.8);
+    border: 1px solid var(--stroke); border-radius: 999px; padding: 9px 16px; cursor: pointer;
+    backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 7px; transition: background .2s;
+  }
+  #histToggle:hover { background: rgba(40,40,64,.9); }
+  #sidebar {
+    position: fixed; top: 0; left: 0; z-index: 25; width: 260px; max-width: 82vw; height: 100%;
+    background: rgba(13,13,26,.9); border-right: 1px solid var(--stroke); backdrop-filter: blur(16px);
+    display: flex; flex-direction: column; padding: 70px 14px 18px; transform: translateX(-100%);
+    transition: transform .28s cubic-bezier(.3,.7,.2,1); box-shadow: 10px 0 40px rgba(0,0,0,.4);
+  }
+  #sidebar.open { transform: translateX(0); }
+  .sbhead { display: flex; align-items: center; justify-content: space-between; padding: 0 8px 12px; }
+  .sbhead .t { font-family: "Sora", sans-serif; font-size: .7rem; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); }
+  .sbhead .clear { font-size: .72rem; color: var(--muted); background: none; border: none; cursor: pointer; padding: 4px; }
+  .sbhead .clear:hover { color: var(--accent); }
+  .histlist { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .histlist .empty { color: var(--muted); font-size: .8rem; padding: 10px 10px; opacity: .7; }
+  .histitem {
+    text-align: left; font-family: "Sora", sans-serif; font-size: 1rem; font-weight: 600; color: var(--fg);
+    background: none; border: none; border-radius: 10px; padding: 9px 12px; cursor: pointer;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background .15s;
+  }
+  .histitem:hover { background: rgba(255,255,255,.08); }
+  .histitem.cur { background: rgba(124,92,255,.22); }
+  .histlist::-webkit-scrollbar { width: 8px; }
+  .histlist::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 8px; }
+</style>
+</head>
+<body>
+  <div class="aurora" aria-hidden="true"><span class="a"></span><span class="b"></span><span class="c"></span></div>
+
+  <button id="histToggle" aria-label="histórico">☰ histórico</button>
+  <aside id="sidebar">
+    <div class="sbhead">
+      <span class="t">histórico</span>
+      <button id="histClear" class="clear">limpar</button>
+    </div>
+    <div id="histlist" class="histlist"></div>
+  </aside>
+
+  <h1>Neologismos</h1>
+
+  <main class="stage">
+    <div id="word" class="word" title="clique para copiar">—</div>
+    <div id="syll" class="syll" aria-hidden="true"></div>
+
+    <div class="actions">
+      <button id="fav" class="iconbtn heart" title="favoritar" aria-label="favoritar">♥</button>
+      <button id="share" class="iconbtn" title="copiar link" aria-label="copiar link">🔗</button>
+    </div>
+
+    <div class="controls">
+      <div class="field">
+        <label for="silabas">sílabas</label>
+        <select id="silabas">
+          <option value="0">aleatório</option>
+          <option value="2">2 sílabas</option>
+          <option value="3">3 sílabas</option>
+          <option value="4">4 sílabas</option>
+          <option value="5">5 sílabas</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="tipo">tipo</label>
+        <select id="tipo">
+          <option value="qualquer">qualquer</option>
+          <option value="substantivo">substantivo</option>
+          <option value="adjetivo">adjetivo</option>
+          <option value="verbo">verbo</option>
+        </select>
+      </div>
+    </div>
+
+    <button id="btn"><span class="dice">🎲</span> gerar palavra</button>
+
+    <section id="favs" class="favs">
+      <div class="flabel">favoritos</div>
+      <div id="favlist" class="favlist"></div>
+    </section>
+  </main>
+
+  <footer>sílabas extraídas de ~268 mil palavras do português</footer>
+
+  <div id="toast" class="toast">copiado!</div>
+
+<script src="data.js"></script>
+<script src="words.js"></script>
+<script>
+(function () {
+  var S = window.SYLLABLES || { ini: [], mid: [], fim: [] };
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- Bloom filter: a palavra já existe no português? ----
+  var B = window.WORDS, bits = null;
+  if (B) {
+    var bin = atob(B.bits);
+    bits = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bits[i] = bin.charCodeAt(i);
+  }
+  var enc = new TextEncoder();
+  function fnv1a(bytes, h) { for (var i = 0; i < bytes.length; i++) { h ^= bytes[i]; h = Math.imul(h, 16777619) >>> 0; } return h; }
+  function existe(word) {
+    if (!B) return false;
+    var bs = enc.encode(word);
+    var h1 = fnv1a(bs, 2166136261);
+    var h2 = (fnv1a(bs, 1099511628211 & 0xFFFFFFFF) | 1) >>> 0;
+    for (var i = 0; i < B.k; i++) { var idx = (h1 + i * h2) % B.m; if (!(bits[idx >> 3] & (1 << (idx & 7)))) return false; }
+    return true;
+  }
+
+  // ---- sorteio ponderado pela frequência ----
+  function prep(pool) { var sum = 0, cum = []; for (var i = 0; i < pool.length; i++) { sum += pool[i][1]; cum.push(sum); } return { pool: pool, cum: cum, total: sum }; }
+  var ini = prep(S.ini), mid = prep(S.mid), fim = prep(S.fim);
+  function pick(p) { var r = Math.random() * p.total, lo = 0, hi = p.cum.length - 1; while (lo < hi) { var m = (lo + hi) >> 1; if (p.cum[m] < r) lo = m + 1; else hi = m; } return p.pool[lo][0]; }
+
+  var SUFIXOS = {
+    substantivo: ['ção', 'dade', 'agem', 'mento', 'ura', 'ismo', 'ência', 'eiro', 'ério', 'idão'],
+    adjetivo:    ['oso', 'al', 'ável', 'ível', 'ento', 'ante', 'ino', 'esco', 'udo', 'ático'],
+    verbo:       ['ar', 'er', 'ir', 'ear', 'izar', 'entar']
+  };
+  function vogal(c) { return 'aeiouáàâãéêíóôõúü'.indexOf(c) >= 0; }
+
+  var selSil = document.getElementById('silabas');
+  var selTipo = document.getElementById('tipo');
+
+  function umaPalavra() {
+    var pedido = parseInt(selSil.value, 10) || 0;
+    var tipo = selTipo.value;
+    var tamanhos = [2, 2, 3, 3, 3, 4];
+    var n = pedido || tamanhos[Math.floor(Math.random() * tamanhos.length)];
+    var parts = [pick(ini)];
+    for (var i = 0; i < n - 2; i++) parts.push(pick(mid));
+    if (tipo === 'qualquer') {
+      parts.push(pick(fim));
+    } else {
+      var sufs = SUFIXOS[tipo];
+      var suf = sufs[Math.floor(Math.random() * sufs.length)];
+      var last = parts[parts.length - 1];
+      if (vogal(last.slice(-1)) && vogal(suf[0])) { last = last.slice(0, -1); if (last) parts[parts.length - 1] = last; else parts.pop(); }
+      parts.push(suf);
+    }
+    return { w: parts.join(''), parts: parts };
+  }
+  function feia(w) {
+    if (/(.)\1\1/.test(w)) return true;
+    if (/ii|uu/.test(w)) return true;
+    if (/[bcdfgjklmnpqrstvxz]{3,}/.test(w)) return true;
+    return false;
+  }
+  function gerar() {
+    var o = umaPalavra();
+    for (var t = 0; t < 80 && (existe(o.w) || feia(o.w)); t++) o = umaPalavra();
+    return o;
+  }
+
+  // ---- elementos ----
+  var wordEl = document.getElementById('word');
+  var syllEl = document.getElementById('syll');
+  var toastEl = document.getElementById('toast');
+  var btn = document.getElementById('btn');
+  var favBtn = document.getElementById('fav');
+  var shareBtn = document.getElementById('share');
+  var favsEl = document.getElementById('favs');
+  var favlistEl = document.getElementById('favlist');
+  var sidebar = document.getElementById('sidebar');
+  var histToggle = document.getElementById('histToggle');
+  var histClear = document.getElementById('histClear');
+  var histlistEl = document.getElementById('histlist');
+
+  var atual = { w: '', parts: [] };
+  var toastTimer, spinTimer;
+  var historico = [];
+
+  function toast(msg) {
+    toastEl.textContent = msg; toastEl.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 1500);
+  }
+
+  // ---- favoritos (localStorage) ----
+  var FAVKEY = 'neologismos_favs';
+  function loadFavs() { try { return JSON.parse(localStorage.getItem(FAVKEY)) || []; } catch (e) { return []; } }
+  function saveFavs(a) { try { localStorage.setItem(FAVKEY, JSON.stringify(a)); } catch (e) {} }
+  var favs = loadFavs();
+  function isFav(w) { return favs.some(function (f) { return f.w === w; }); }
+  function renderFavs() {
+    favlistEl.innerHTML = '';
+    favs.forEach(function (f) {
+      var chip = document.createElement('span'); chip.className = 'fav';
+      var name = document.createElement('span'); name.textContent = f.w; chip.appendChild(name);
+      var x = document.createElement('span'); x.className = 'x'; x.textContent = '×'; x.title = 'remover'; chip.appendChild(x);
+      name.addEventListener('click', function () { mostra(f, true); });
+      x.addEventListener('click', function (e) { e.stopPropagation(); favs = favs.filter(function (g) { return g.w !== f.w; }); saveFavs(favs); renderFavs(); updateHeart(); });
+      favlistEl.appendChild(chip);
+    });
+    favsEl.classList.toggle('show', favs.length > 0);
+  }
+  function updateHeart() { favBtn.classList.toggle('on', isFav(atual.w)); }
+  function toggleFav() {
+    if (!atual.w || atual.w === '—') return;
+    if (isFav(atual.w)) { favs = favs.filter(function (f) { return f.w !== atual.w; }); }
+    else { favs.unshift({ w: atual.w, parts: atual.parts }); if (favs.length > 40) favs.pop(); }
+    saveFavs(favs); renderFavs(); updateHeart();
+  }
+
+  // ---- histórico da sessão ----
+  function renderHist() {
+    histlistEl.innerHTML = '';
+    if (!historico.length) { var e = document.createElement('div'); e.className = 'empty'; e.textContent = 'nada ainda — gere uma palavra'; histlistEl.appendChild(e); return; }
+    historico.forEach(function (o) {
+      var b = document.createElement('button'); b.className = 'histitem' + (o.w === atual.w ? ' cur' : '');
+      b.textContent = o.w;
+      b.addEventListener('click', function () { mostra(o, true); });
+      histlistEl.appendChild(b);
+    });
+  }
+  function pushHist(o) {
+    if (historico.length && historico[0].w === o.w) return;
+    historico.unshift({ w: o.w, parts: o.parts });
+    if (historico.length > 200) historico.pop();
+    renderHist();
+  }
+
+  // ---- mostrar palavra (sem re-sortear) ----
+  function mostra(o, pop) {
+    atual = o;
+    wordEl.textContent = o.w;
+    if (pop) { wordEl.classList.remove('pop'); void wordEl.offsetWidth; wordEl.classList.add('pop'); }
+    syllEl.innerHTML = '';
+    (o.parts || []).forEach(function (p) { var s = document.createElement('span'); s.textContent = p; syllEl.appendChild(s); });
+    try { history.replaceState(null, '', '#' + encodeURIComponent(o.w)); } catch (e) { location.hash = encodeURIComponent(o.w); }
+    updateHeart();
+    renderHist();
+  }
+
+  // ---- animação slot-machine, depois assenta na palavra final ----
+  function novo() {
+    var o = gerar();
+    if (reduce) { pushHist(o); mostra(o, true); return; }
+    clearInterval(spinTimer);
+    syllEl.innerHTML = '';
+    wordEl.classList.add('spin'); wordEl.classList.remove('pop');
+    var i = 0, ticks = 6;
+    spinTimer = setInterval(function () {
+      wordEl.textContent = pick(ini) + pick(mid) + pick(fim);
+      if (++i >= ticks) { clearInterval(spinTimer); wordEl.classList.remove('spin'); pushHist(o); mostra(o, true); }
+    }, 30);
+  }
+
+  // ---- compartilhar / copiar link ----
+  function share() {
+    if (!atual.w) return;
+    var url = location.href.split('#')[0] + '#' + encodeURIComponent(atual.w);
+    if (navigator.share) { navigator.share({ title: 'Neologismo', text: atual.w, url: url }).catch(function () {}); }
+    else if (navigator.clipboard) { navigator.clipboard.writeText(url).then(function () { toast('link copiado!'); }).catch(function () { toast(url); }); }
+    else { toast(url); }
+  }
+
+  // ---- listeners ----
+  wordEl.addEventListener('click', function () {
+    if (!atual.w || atual.w === '—') return;
+    if (navigator.clipboard) { navigator.clipboard.writeText(atual.w).then(function () { toast('copiado: ' + atual.w); }).catch(function () {}); }
+  });
+  btn.addEventListener('click', novo);
+  favBtn.addEventListener('click', toggleFav);
+  shareBtn.addEventListener('click', share);
+  histToggle.addEventListener('click', function () { sidebar.classList.toggle('open'); });
+  histClear.addEventListener('click', function () { historico = []; renderHist(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'SELECT') return;
+    if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); novo(); }
+  });
+
+  // ---- início ----
+  renderFavs();
+  renderHist();
+  var h = '';
+  try { h = decodeURIComponent((location.hash || '').replace(/^#/, '')); } catch (e) {}
+  if (h) { pushHist({ w: h, parts: [] }); mostra({ w: h, parts: [] }, true); }
+  else novo();
+})();
+</script>
+</body>
+</html>
