@@ -144,12 +144,58 @@
   .histitem.cur { background: rgba(124,92,255,.22); }
   .histlist::-webkit-scrollbar { width: 8px; }
   .histlist::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 8px; }
+
+  /* botão "como funciona" + modal */
+  #infoToggle {
+    position: fixed; top: 18px; right: 18px; z-index: 30; width: 40px; height: 40px; border-radius: 50%;
+    font-family: "Sora", sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--fg);
+    background: rgba(17,17,32,.8); border: 1px solid var(--stroke); cursor: pointer; backdrop-filter: blur(8px);
+    transition: background .2s, transform .1s;
+  }
+  #infoToggle:hover { background: rgba(40,40,64,.9); transform: translateY(-2px); }
+  .overlay {
+    position: fixed; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center;
+    padding: 20px; background: rgba(5,5,12,.6); backdrop-filter: blur(4px);
+  }
+  .overlay.show { display: flex; }
+  .modal {
+    width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; text-align: left;
+    background: rgba(18,18,34,.96); border: 1px solid var(--stroke); border-radius: 22px;
+    padding: 28px 26px; box-shadow: 0 30px 80px rgba(0,0,0,.55); animation: pop .3s cubic-bezier(.2,.9,.25,1.3);
+  }
+  .modal h2 { font-family: "Sora", sans-serif; font-size: 1.2rem; margin: 0 0 4px; color: #fff; }
+  .modal .close { position: absolute; top: 14px; right: 16px; font-size: 1.5rem; line-height: 1; color: var(--muted); background: none; border: none; cursor: pointer; }
+  .modal .close:hover { color: var(--accent); }
+  .modal p { color: var(--muted); font-size: .92rem; line-height: 1.6; margin: 14px 0 0; }
+  .modal b { color: var(--fg); font-weight: 600; }
+  .modal ol { color: var(--muted); font-size: .92rem; line-height: 1.6; margin: 14px 0 0; padding-left: 20px; }
+  .modal ol li { margin-bottom: 10px; }
+  .modal .mhead { position: relative; }
 </style>
 </head>
 <body>
   <div class="aurora" aria-hidden="true"><span class="a"></span><span class="b"></span><span class="c"></span></div>
 
   <button id="histToggle" aria-label="histórico">☰ histórico</button>
+  <button id="infoToggle" title="como funciona" aria-label="como funciona">?</button>
+
+  <div id="overlay" class="overlay">
+    <div class="modal">
+      <div class="mhead">
+        <h2>Como funciona</h2>
+        <button id="infoClose" class="close" aria-label="fechar">×</button>
+      </div>
+      <p>Um gerador de palavras que <b>ainda não existem</b> em português — mas que soam como se existissem.</p>
+      <ol>
+        <li>Peguei <b>~268 mil palavras</b> do português e separei todas em <b>sílabas</b>.</li>
+        <li>Cada palavra nova é feita <b>sorteando sílabas</b> (de início, meio e fim), com peso pela frequência — por isso tem cara de português de verdade.</li>
+        <li>Descarto o que <b>já existe</b> (comparo com 433 mil palavras reais) e o que fica <b>impronunciável</b>, e sorteio de novo.</li>
+        <li>Os <b>dropdowns</b> controlam o tamanho e o tipo (substantivo, adjetivo, verbo).</li>
+        <li>Curtiu? <b>♥ favoritar</b> salva no navegador, <b>🔗</b> gera um link da palavra, e o <b>histórico</b> guarda tudo que você gerou.</li>
+      </ol>
+      <p>Tudo roda <b>100% no seu navegador</b> — nada é enviado pra lugar nenhum.</p>
+    </div>
+  </div>
   <aside id="sidebar">
     <div class="sbhead">
       <span class="t">histórico</span>
@@ -385,8 +431,20 @@
   shareBtn.addEventListener('click', share);
   histToggle.addEventListener('click', function () { sidebar.classList.toggle('open'); });
   histClear.addEventListener('click', function () { historico = []; renderHist(); });
+
+  var overlay = document.getElementById('overlay');
+  var infoToggle = document.getElementById('infoToggle');
+  var infoClose = document.getElementById('infoClose');
+  function abreInfo() { overlay.classList.add('show'); }
+  function fechaInfo() { overlay.classList.remove('show'); }
+  infoToggle.addEventListener('click', abreInfo);
+  infoClose.addEventListener('click', fechaInfo);
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) fechaInfo(); });
+
   document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { fechaInfo(); return; }
     if (e.target.tagName === 'SELECT') return;
+    if (overlay.classList.contains('show')) return;
     if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); novo(); }
   });
 
