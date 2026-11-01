@@ -52,8 +52,28 @@
   .stage.neural .neural-only { display: flex; }
   #temp { width: 120px; }
 
-  .genrow { display: flex; gap: 8px; justify-content: center; margin: 4px 0 2px; }
-  #btn { padding: 7px 16px; font-weight: bold; }
+  .genrow { display: flex; justify-content: center; margin: 16px 0 6px; padding-top: 14px; border-top: 1px solid #808080; box-shadow: inset 0 1px #fff; }
+  #btn { padding: 13px 30px; font-weight: bold; font-size: 16px; min-width: 260px; max-width: 100%; letter-spacing: .5px; }
+
+  /* menu Iniciar */
+  .start.open { box-shadow: inset -1px -1px #fff, inset 1px 1px grey, inset -2px -2px #dfdfdf, inset 2px 2px #0a0a0a; }
+  .start-menu { position: fixed; left: 4px; bottom: 31px; width: 206px; display: none; z-index: 95; background: #c0c0c0; padding: 3px;
+    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey, inset 2px 2px #dfdfdf; }
+  .start-menu.open { display: flex; }
+  .sm-side { width: 28px; min-width: 28px; background: linear-gradient(#1084d0, #000080); color: #fff;
+    writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 15px; text-align: left; padding: 10px 4px; }
+  .sm-side b { color: #c0c0c0; font-weight: bold; }
+  .sm-items { list-style: none; margin: 0; padding: 0; flex: 1; }
+  .sm-items li { display: flex; align-items: center; gap: 9px; padding: 6px 12px 6px 8px; font-size: 13px; cursor: pointer; }
+  .sm-items li:hover:not(.sm-sep) { background: #000080; color: #fff; }
+  .sm-ico { width: 18px; min-width: 18px; text-align: center; }
+  .sm-sep { height: 0; padding: 0 !important; margin: 3px 4px; border-top: 1px solid #808080; border-bottom: 1px solid #fff; cursor: default; }
+
+  /* tela "é seguro desligar" */
+  .shutdown { position: fixed; inset: 0; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; cursor: pointer; }
+  .shutdown.show { display: flex; }
+  .sd-text { color: #ff8c00; font-size: 26px; font-weight: bold; text-align: center; line-height: 1.5; font-family: Arial, sans-serif; }
+  .sd-sub { color: #666; font-size: 12px; margin-top: 26px; }
 
   /* visualizador da computação */
   .viz { margin-top: 12px; }
@@ -151,6 +171,7 @@
         </div>
         <button id="fav" class="iconbtn" title="favoritar">&hearts;</button>
         <button id="share" class="iconbtn" title="copiar link">&#128279;</button>
+        <button id="histToggle" title="hist&oacute;rico">&#128220;</button>
       </div>
 
       <div class="controls">
@@ -179,8 +200,7 @@
       </div>
 
       <div class="genrow">
-        <button id="btn" class="default">&#127922; gerar palavra</button>
-        <button id="histToggle">hist&oacute;rico</button>
+        <button id="btn" class="default">&#127922;&nbsp; GERAR PALAVRA</button>
       </div>
 
       <fieldset class="viz">
@@ -196,10 +216,29 @@
   </div>
 </div>
 
-<!-- taskbar decorativa -->
+<!-- taskbar -->
 <div class="taskbar">
-  <button class="start">&#129750; Iniciar</button>
+  <button class="start" id="startBtn">&#129750; Iniciar</button>
   <div class="tray"><span id="clock">--:--</span></div>
+</div>
+
+<!-- menu Iniciar -->
+<div id="startMenu" class="start-menu">
+  <div class="sm-side">Neologismos<b>98</b></div>
+  <ul class="sm-items">
+    <li data-act="gerar"><span class="sm-ico">&#127922;</span> Gerar palavra</li>
+    <li data-act="hist"><span class="sm-ico">&#128220;</span> Hist&oacute;rico</li>
+    <li data-act="info"><span class="sm-ico">&#10067;</span> Como funciona</li>
+    <li data-act="code"><span class="sm-ico">&#128187;</span> C&oacute;digo-fonte</li>
+    <li class="sm-sep"></li>
+    <li data-act="shutdown"><span class="sm-ico">&#9211;</span> Desligar...</li>
+  </ul>
+</div>
+
+<!-- tela de desligar (fake) -->
+<div id="shutdown" class="shutdown">
+  <div class="sd-text">Agora &eacute; seguro desligar<br>o computador.</div>
+  <div class="sd-sub">(clique para voltar)</div>
 </div>
 
 <!-- modal "como funciona" -->
@@ -232,6 +271,29 @@
   tick(); setInterval(tick, 15000);
   var hc = document.getElementById('histClose'), sb = document.getElementById('sidebar');
   if (hc && sb) hc.addEventListener('click', function () { sb.classList.remove('open'); });
+
+  // menu Iniciar
+  var startBtn = document.getElementById('startBtn'), startMenu = document.getElementById('startMenu');
+  function closeStart() { startMenu.classList.remove('open'); startBtn.classList.remove('open'); }
+  startBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var open = startMenu.classList.toggle('open'); startBtn.classList.toggle('open', open);
+  });
+  startMenu.addEventListener('click', function (e) { e.stopPropagation(); });
+  document.addEventListener('click', closeStart);
+  var items = startMenu.querySelectorAll('li[data-act]');
+  for (var i = 0; i < items.length; i++) {
+    items[i].addEventListener('click', function () {
+      var act = this.getAttribute('data-act'); closeStart();
+      if (act === 'gerar') document.getElementById('btn').click();
+      else if (act === 'hist') sb.classList.toggle('open');
+      else if (act === 'info') document.getElementById('overlay').classList.add('show');
+      else if (act === 'code') window.open('https://github.com/caioluders/neologismos', '_blank');
+      else if (act === 'shutdown') document.getElementById('shutdown').classList.add('show');
+    });
+  }
+  var sd = document.getElementById('shutdown');
+  if (sd) sd.addEventListener('click', function () { sd.classList.remove('show'); });
 })();
 </script>
 
