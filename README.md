@@ -1,4 +1,4 @@
-# 🧠 NeologIA OS 98
+# NeologIA OS 98
 
 Um gerador de **palavras que ainda não existem** em português — com cara de **Windows 98** e uma **mini-rede neural** rodando dentro do navegador.
 
@@ -14,12 +14,12 @@ Tudo é **100% client-side** (estático, sem backend): dá pra hospedar no GitHu
 
 Dois "motores" inventam palavras plausíveis que **não constam no português**:
 
-### 🧠 neural (padrão)
+### neural (padrão)
 Uma **mini-LLM a nível de caractere** (um MLP no estilo *makemore* do Karpathy — o avô conceitual do GPT). Ela gera a palavra **letra por letra**, prevendo a próxima com base nas anteriores. Foi **treinada com [tinygrad](https://github.com/tinygrad/tinygrad)** em ~268 mil palavras do português e exportada pra `model.json` (~21 mil parâmetros, ~180 KB). O *forward pass* é reimplementado em **JavaScript puro**, então a rede roda no seu navegador sem framework nenhum.
 
 O painel **"a computação"** mostra, a cada letra, as probabilidades que a rede calculou — com a letra escolhida em destaque. A **temperatura** (0 a 1.5) controla o trade-off coerência × criatividade: baixa = conservador/determinístico, alta = ousado/caótico.
 
-### 🔤 sílabas
+### sílabas
 Sorteia sílabas reais (separadas com [pyphen](https://pyphen.org/) e **ponderadas por frequência**) e as emenda. Dá pra escolher nº de sílabas e o tipo (substantivo/adjetivo/verbo, forçando a terminação).
 
 ### Filtros (valem pros dois motores)
@@ -68,7 +68,7 @@ python scripts/sample.py 20 0.9     # amostra palavras de um model.json
 ### A mini-LLM em detalhe
 Arquitetura (`scripts/train.py`): `Embedding(vocab, 24)` → concat de 5 letras de contexto → `Linear(120, 128)` + `tanh` → `Linear(128, 40)` → softmax. Treinada com cross-entropy + Adam. ~21 mil parâmetros, perda final ~2.05 (perplexidade ~8).
 
-### Nota sobre a GPU 🪫
+### Nota sobre a GPU
 O treino roda em **CPU** via tinygrad. Tentamos a GPU (AMD RX 9070 XT / RDNA4, `gfx1201`) mas o backend nativo do tinygrad dá **HW fault** no *graph replay* do JIT nessa arquitetura nova (ver [tinygrad#17920](https://github.com/tinygrad/tinygrad) e a instabilidade geral de RDNA4 em compute). Com `JIT=0` a GPU não trava, mas fica lenta demais. Como o modelo é minúsculo, a CPU resolve em ~6 min. Os scripts `scripts/gpu.sh` / `scripts/cpu.sh` guardam a configuração de ambiente usada.
 
 ---
@@ -80,4 +80,4 @@ O treino roda em **CPU** via tinygrad. Tentamos a GPU (AMD RX 9070 XT / RDNA4, `
 - listas de palavras: [pythonprobr/palavras](https://github.com/pythonprobr/palavras), [HermitDave/FrequencyWords](https://github.com/hermitdave/FrequencyWords)
 - ideia do modelo char-level: [makemore](https://github.com/karpathy/makemore) (Karpathy)
 
-Feito por brincadeira. Use as palavras à vontade — elas não existem (ainda). 😉
+Feito por brincadeira. Use as palavras à vontade — elas não existem (ainda).
