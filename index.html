@@ -5,252 +5,238 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Neologismos</title>
 <meta name="description" content="Gerador de palavras que ainda não existem em português.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="98.css">
 <style>
-  :root {
-    --bg: #0b0b16;
-    --fg: #f6f5ff;
-    --muted: #c3bfe4;
-    --accent: #ff6b9d;
-    --accent2: #7c5cff;
-    --accent3: #36d1dc;
-    --card: rgba(17,17,32,.72);
-    --stroke: rgba(255,255,255,.14);
-  }
-  * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; }
+  html, body { height: 100%; }
   body {
-    font-family: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg); color: var(--fg); min-height: 100%;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 24px 16px; text-align: center; overflow-x: hidden; position: relative;
+    margin: 0; font-family: "Pixelated MS Sans Serif", Arial, sans-serif; color: #000;
+    background-color: #0b6b6b;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 2px, transparent 2px 10px),
+      linear-gradient(135deg, #0a7d7d 0%, #065e63 100%);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px 16px 54px; min-height: 100%;
   }
+  .desktop { display: flex; gap: 16px; align-items: flex-start; }
 
-  /* aurora de fundo */
-  .aurora { position: fixed; inset: 0; z-index: -1; overflow: hidden; filter: blur(80px); opacity: .38; }
-  .aurora span { position: absolute; width: 50vmax; height: 50vmax; border-radius: 50%; mix-blend-mode: screen; animation: float 18s ease-in-out infinite; }
-  .aurora .a { background: var(--accent2); top: -15%; left: -10%; }
-  .aurora .b { background: var(--accent);  bottom: -20%; right: -10%; animation-delay: -6s; }
-  .aurora .c { background: var(--accent3); top: 30%; right: 20%; animation-delay: -12s; animation-duration: 24s; }
-  @keyframes float { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(6vw,8vh) scale(1.15); } 66% { transform: translate(-5vw,-6vh) scale(.9); } }
-  @media (prefers-reduced-motion: reduce) { .aurora span { animation: none; } }
+  #mainwin { width: 440px; max-width: 94vw; }
+  .window-body { margin: 10px; }
 
-  h1 { font-family: "Sora", sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: #fff; margin: 0 0 34px; padding-left: .22em; }
-
-  .stage {
-    width: 100%; max-width: 680px; background: var(--card);
-    border: 1px solid var(--stroke); border-radius: 28px; padding: 48px 24px 36px;
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 30px 80px rgba(0,0,0,.45);
-  }
+  /* palavra gerada */
   .word {
-    font-family: "Sora", sans-serif; font-weight: 800; font-size: clamp(2.4rem, 11vw, 5rem);
-    line-height: 1.05; letter-spacing: -.02em; word-break: break-word; cursor: pointer; user-select: all;
-    background-image: linear-gradient(110deg, #7ff0ff, #c3b3ff 50%, #ff9ec6);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    filter: drop-shadow(0 2px 12px rgba(124,92,255,.25)); transition: transform .12s cubic-bezier(.2,.8,.2,1);
+    min-height: 92px; display: flex; align-items: center; justify-content: center;
+    padding: 12px; margin: 2px 0 10px; background: #fff;
+    font-size: 30px; font-weight: bold; color: #000080; line-height: 1.1;
+    text-align: center; word-break: break-word; cursor: pointer;
   }
-  .word.pop { animation: pop .35s cubic-bezier(.2,.9,.25,1.3); }
-  .word.spin { opacity: .55; filter: blur(.6px); }
-  @keyframes pop { 0% { transform: scale(.92); opacity: .3; } 100% { transform: scale(1); opacity: 1; } }
+  .word.spin { color: #808080; }
+  .word.pop { animation: pop .18s steps(2); }
+  @keyframes pop { from { transform: scale(.92); } to { transform: scale(1); } }
 
-  .syll { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 18px; min-height: 28px; }
-  .syll span { font-size: .85rem; font-weight: 500; color: #e9e6ff; background: rgba(255,255,255,.10); border: 1px solid var(--stroke); border-radius: 8px; padding: 4px 10px; }
+  .syll { text-align: center; margin: -4px 0 8px; min-height: 18px; }
+  .stage.neural .syll { display: none; }
+  .syll span { display: inline-block; border: 1px solid #808080; background: #fff; padding: 0 5px; margin: 2px; font-size: 11px; }
 
-  .actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
-  .iconbtn {
-    width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--stroke);
-    background: rgba(255,255,255,.05); color: var(--fg); font-size: 1.1rem; cursor: pointer;
-    display: inline-flex; align-items: center; justify-content: center; line-height: 1;
-    transition: transform .1s, background .2s, border-color .2s, color .2s;
-  }
-  .iconbtn:hover { background: rgba(255,255,255,.12); transform: translateY(-2px); }
-  .iconbtn:active { transform: scale(.92); }
-  .iconbtn.heart { color: var(--muted); font-size: 1.25rem; }
-  .iconbtn.heart.on { color: var(--accent); border-color: rgba(255,107,157,.5); background: rgba(255,107,157,.14); }
+  .row-actions { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .engine { display: inline-flex; }
+  .engine .eng { min-width: 0; }
+  .eng.on { box-shadow: inset -1px -1px #fff, inset 1px 1px grey, inset -2px -2px #dfdfdf, inset 2px 2px #0a0a0a; padding-top: 4px; padding-left: 7px; }
+  .iconbtn { min-width: 34px; }
+  .iconbtn.on { color: #b00000; }
 
-  .controls { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 26px; }
-  .field { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
-  .field label { font-size: .65rem; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); padding-left: 4px; }
-  select {
-    appearance: none; -webkit-appearance: none; font: inherit; font-size: .9rem; font-weight: 500; color: var(--fg);
-    background: rgba(255,255,255,.05); border: 1px solid var(--stroke); border-radius: 12px;
-    padding: 11px 38px 11px 15px; cursor: pointer; transition: border-color .2s, background .2s;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%239a96bd' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 14px center;
-  }
-  select:hover { background-color: rgba(255,255,255,.09); }
-  select:focus { outline: none; border-color: var(--accent2); }
-  select option { background: #16162a; color: var(--fg); }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: center; align-items: center; margin-bottom: 8px; }
+  .controls .field-row { margin: 0; }
+  .neural-only { display: none; }
+  .stage.neural .syl-only { display: none; }
+  .stage.neural .neural-only { display: flex; }
+  #temp { width: 120px; }
 
-  button#btn {
-    margin-top: 30px; font-family: "Sora", sans-serif; font-size: 1.05rem; font-weight: 700; color: #fff;
-    border: none; border-radius: 999px; padding: 16px 46px; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 10px;
-    background: linear-gradient(110deg, var(--accent2), var(--accent)); box-shadow: 0 12px 34px rgba(124,92,255,.45);
-    transition: transform .1s ease, box-shadow .25s ease, filter .25s ease;
-  }
-  button#btn:hover { transform: translateY(-2px); box-shadow: 0 18px 44px rgba(124,92,255,.55); filter: brightness(1.06); }
-  button#btn:active { transform: translateY(0) scale(.97); }
-  button#btn .dice { font-size: 1.15rem; transition: transform .4s ease; }
-  button#btn:hover .dice { transform: rotate(-20deg); }
+  .genrow { display: flex; gap: 8px; justify-content: center; margin: 4px 0 2px; }
+  #btn { padding: 7px 16px; font-weight: bold; }
 
-  .favs { margin-top: 30px; border-top: 1px solid var(--stroke); padding-top: 22px; display: none; }
+  /* visualizador da computação */
+  .viz { margin-top: 12px; }
+  .viz legend { font-weight: bold; }
+  .vizbody { max-height: 240px; overflow: auto; background: #fff; padding: 6px 8px; }
+  .vempty { font-size: 12px; color: #808080; padding: 10px 4px; text-align: center; }
+  .vstep { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; border-bottom: 1px dotted #c0c0c0; }
+  .vctx { width: 66px; min-width: 66px; text-align: right; direction: rtl; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; color: #000080; }
+  .vbars { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .vbar { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #555; }
+  .vbar.on { color: #000; font-weight: bold; }
+  .vch { width: 14px; min-width: 14px; text-align: center; }
+  .vtrack { flex: 1; height: 10px; border: 1px solid #808080; background: #fff; overflow: hidden; }
+  .vfill { display: block; height: 100%; background: #9a9a9a; }
+  .vbar.on .vfill { background: #000080; }
+  .vp { width: 30px; min-width: 30px; text-align: right; font-size: 11px; }
+
+  /* favoritos */
+  .favs { display: none; margin-top: 12px; }
   .favs.show { display: block; }
-  .favs .flabel { font-size: .65rem; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
-  .favlist { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-  .fav {
-    display: inline-flex; align-items: center; gap: 8px; font-size: .9rem; font-weight: 600;
-    color: var(--fg); background: rgba(255,255,255,.07); border: 1px solid var(--stroke);
-    border-radius: 999px; padding: 6px 8px 6px 14px; cursor: pointer; transition: background .2s;
-  }
-  .fav:hover { background: rgba(255,255,255,.13); }
-  .fav .x { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--muted); background: rgba(255,255,255,.06); }
-  .fav .x:hover { color: var(--accent); background: rgba(255,107,157,.18); }
+  .flabel { font-size: 11px; color: #555; text-transform: uppercase; margin-bottom: 4px; }
+  .favlist { display: flex; flex-wrap: wrap; gap: 4px; }
+  .fav { display: inline-flex; align-items: center; gap: 4px; border: 1px solid #808080; background: #fff; padding: 1px 2px 1px 7px; font-size: 12px; cursor: pointer; }
+  .fav .x { padding: 0 4px; cursor: pointer; }
+  .fav .x:hover { background: #000080; color: #fff; }
 
-  footer { margin-top: 30px; color: var(--muted); font-size: .78rem; line-height: 1.6; max-width: 520px; }
+  /* janela de histórico (flutuante) */
+  #sidebar { width: 190px; display: none; }
+  #sidebar.open { display: block; }
+  .hclear { font-size: 11px; margin-bottom: 6px; }
+  .histlist { height: 320px; overflow: auto; background: #fff; padding: 2px; }
+  .histitem { display: block; width: 100%; text-align: left; border: none; box-shadow: none; background: none; padding: 3px 6px; font: inherit; font-size: 12px; cursor: pointer; }
+  .histitem:hover { background: #000080; color: #fff; }
+  .histitem.cur { background: #c0c0c0; box-shadow: inset -1px -1px #fff, inset 1px 1px grey; }
+  .histitem:active { box-shadow: none; }
+  .histlist .empty { font-size: 12px; color: #808080; padding: 8px; }
 
-  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(20,20,36,.92); border: 1px solid var(--stroke); color: var(--fg); padding: 10px 18px; border-radius: 999px; font-size: .85rem; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; backdrop-filter: blur(8px); }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  /* taskbar */
+  .taskbar { position: fixed; left: 0; right: 0; bottom: 0; height: 30px; background: #c0c0c0;
+    box-shadow: inset 0 2px #fff, inset 0 1px #dfdfdf; display: flex; align-items: center; padding: 3px 4px; gap: 6px; z-index: 90; }
+  .taskbar .start { font-weight: bold; display: flex; align-items: center; gap: 5px; }
+  .taskbar .tray { margin-left: auto; padding: 3px 10px; font-size: 12px; box-shadow: inset -1px -1px #fff, inset 1px 1px grey; }
 
-  /* sidebar de histórico */
-  #histToggle {
-    position: fixed; top: 18px; left: 18px; z-index: 30; font-family: "Sora", sans-serif;
-    font-size: .8rem; font-weight: 600; color: var(--fg); background: rgba(17,17,32,.8);
-    border: 1px solid var(--stroke); border-radius: 999px; padding: 9px 16px; cursor: pointer;
-    backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 7px; transition: background .2s;
-  }
-  #histToggle:hover { background: rgba(40,40,64,.9); }
-  #sidebar {
-    position: fixed; top: 0; left: 0; z-index: 25; width: 260px; max-width: 82vw; height: 100%;
-    background: rgba(13,13,26,.9); border-right: 1px solid var(--stroke); backdrop-filter: blur(16px);
-    display: flex; flex-direction: column; padding: 70px 14px 18px; transform: translateX(-100%);
-    transition: transform .28s cubic-bezier(.3,.7,.2,1); box-shadow: 10px 0 40px rgba(0,0,0,.4);
-  }
-  #sidebar.open { transform: translateX(0); }
-  .sbhead { display: flex; align-items: center; justify-content: space-between; padding: 0 8px 12px; }
-  .sbhead .t { font-family: "Sora", sans-serif; font-size: .7rem; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); }
-  .sbhead .clear { font-size: .72rem; color: var(--muted); background: none; border: none; cursor: pointer; padding: 4px; }
-  .sbhead .clear:hover { color: var(--accent); }
-  .histlist { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 2px; }
-  .histlist .empty { color: var(--muted); font-size: .8rem; padding: 10px 10px; opacity: .7; }
-  .histitem {
-    text-align: left; font-family: "Sora", sans-serif; font-size: 1rem; font-weight: 600; color: var(--fg);
-    background: none; border: none; border-radius: 10px; padding: 9px 12px; cursor: pointer;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background .15s;
-  }
-  .histitem:hover { background: rgba(255,255,255,.08); }
-  .histitem.cur { background: rgba(124,92,255,.22); }
-  .histlist::-webkit-scrollbar { width: 8px; }
-  .histlist::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 8px; }
-
-  /* botão "como funciona" + modal */
-  #infoToggle {
-    position: fixed; top: 18px; right: 18px; z-index: 30; width: 40px; height: 40px; border-radius: 50%;
-    font-family: "Sora", sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--fg);
-    background: rgba(17,17,32,.8); border: 1px solid var(--stroke); cursor: pointer; backdrop-filter: blur(8px);
-    transition: background .2s, transform .1s;
-  }
-  #infoToggle:hover { background: rgba(40,40,64,.9); transform: translateY(-2px); }
-  .overlay {
-    position: fixed; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center;
-    padding: 20px; background: rgba(5,5,12,.6); backdrop-filter: blur(4px);
-  }
+  /* modal "como funciona" */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 100; }
   .overlay.show { display: flex; }
-  .modal {
-    width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; text-align: left;
-    background: rgba(18,18,34,.96); border: 1px solid var(--stroke); border-radius: 22px;
-    padding: 28px 26px; box-shadow: 0 30px 80px rgba(0,0,0,.55); animation: pop .3s cubic-bezier(.2,.9,.25,1.3);
-  }
-  .modal h2 { font-family: "Sora", sans-serif; font-size: 1.2rem; margin: 0 0 4px; color: #fff; }
-  .modal .close { position: absolute; top: 14px; right: 16px; font-size: 1.5rem; line-height: 1; color: var(--muted); background: none; border: none; cursor: pointer; }
-  .modal .close:hover { color: var(--accent); }
-  .modal p { color: var(--muted); font-size: .92rem; line-height: 1.6; margin: 14px 0 0; }
-  .modal b { color: var(--fg); font-weight: 600; }
-  .modal ol { color: var(--muted); font-size: .92rem; line-height: 1.6; margin: 14px 0 0; padding-left: 20px; }
-  .modal ol li { margin-bottom: 10px; }
-  .modal .mhead { position: relative; }
+  .dialog { width: 460px; max-width: 94vw; }
+  .dialog .window-body { font-size: 13px; line-height: 1.55; }
+  .dialog .window-body p { margin: 10px 0 0; }
+  .dialog ol { margin: 8px 0 0; padding-left: 22px; }
+  .dialog li { margin-bottom: 7px; }
+
+  /* toast */
+  .toast { position: fixed; bottom: 42px; left: 50%; transform: translateX(-50%); display: none; padding: 8px 14px; font-size: 12px; z-index: 120; }
+  .toast.show { display: block; }
+
+  @media (max-width: 560px) { .desktop { flex-direction: column; align-items: center; } #sidebar { width: 100%; } }
 </style>
 </head>
 <body>
-  <div class="aurora" aria-hidden="true"><span class="a"></span><span class="b"></span><span class="c"></span></div>
+<div class="desktop">
 
-  <button id="histToggle" aria-label="histórico">☰ histórico</button>
-  <button id="infoToggle" title="como funciona" aria-label="como funciona">?</button>
-
-  <div id="overlay" class="overlay">
-    <div class="modal">
-      <div class="mhead">
-        <h2>Como funciona</h2>
-        <button id="infoClose" class="close" aria-label="fechar">×</button>
-      </div>
-      <p>Um gerador de palavras que <b>ainda não existem</b> em português — mas que soam como se existissem.</p>
-      <ol>
-        <li>Peguei <b>~268 mil palavras</b> do português e separei todas em <b>sílabas</b>.</li>
-        <li>Cada palavra nova é feita <b>sorteando sílabas</b> (de início, meio e fim), com peso pela frequência — por isso tem cara de português de verdade.</li>
-        <li>Descarto o que <b>já existe</b> (comparo com 433 mil palavras reais) e o que fica <b>impronunciável</b>, e sorteio de novo.</li>
-        <li>Os <b>dropdowns</b> controlam o tamanho e o tipo (substantivo, adjetivo, verbo).</li>
-        <li>Curtiu? <b>♥ favoritar</b> salva no navegador, <b>🔗</b> gera um link da palavra, e o <b>histórico</b> guarda tudo que você gerou.</li>
-      </ol>
-      <p>Tudo roda <b>100% no seu navegador</b> — nada é enviado pra lugar nenhum.</p>
+  <!-- janela de histórico (abre/fecha pelo botão "histórico") -->
+  <div id="sidebar" class="window">
+    <div class="title-bar">
+      <div class="title-bar-text">Histórico</div>
+      <div class="title-bar-controls"><button id="histClose" aria-label="Close"></button></div>
+    </div>
+    <div class="window-body">
+      <button id="histClear" class="hclear">limpar</button>
+      <div id="histlist" class="histlist sunken-panel"></div>
     </div>
   </div>
-  <aside id="sidebar">
-    <div class="sbhead">
-      <span class="t">histórico</span>
-      <button id="histClear" class="clear">limpar</button>
-    </div>
-    <div id="histlist" class="histlist"></div>
-  </aside>
 
-  <h1>Neologismos</h1>
-
-  <main class="stage">
-    <div id="word" class="word" title="clique para copiar">—</div>
-    <div id="syll" class="syll" aria-hidden="true"></div>
-
-    <div class="actions">
-      <button id="fav" class="iconbtn heart" title="favoritar" aria-label="favoritar">♥</button>
-      <button id="share" class="iconbtn" title="copiar link" aria-label="copiar link">🔗</button>
-    </div>
-
-    <div class="controls">
-      <div class="field">
-        <label for="silabas">sílabas</label>
-        <select id="silabas">
-          <option value="0">aleatório</option>
-          <option value="2">2 sílabas</option>
-          <option value="3">3 sílabas</option>
-          <option value="4">4 sílabas</option>
-          <option value="5">5 sílabas</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="tipo">tipo</label>
-        <select id="tipo">
-          <option value="qualquer">qualquer</option>
-          <option value="substantivo">substantivo</option>
-          <option value="adjetivo">adjetivo</option>
-          <option value="verbo">verbo</option>
-        </select>
+  <!-- janela principal -->
+  <div id="mainwin" class="window stage">
+    <div class="title-bar">
+      <div class="title-bar-text">&#129504; Neologismos</div>
+      <div class="title-bar-controls">
+        <button id="infoToggle" aria-label="Help"></button>
+        <button aria-label="Minimize"></button>
+        <button aria-label="Maximize"></button>
+        <button aria-label="Close"></button>
       </div>
     </div>
+    <div class="window-body">
 
-    <button id="btn"><span class="dice">🎲</span> gerar palavra</button>
+      <div id="word" class="word sunken-panel" title="clique para copiar">&mdash;</div>
+      <div id="syll" class="syll" aria-hidden="true"></div>
 
-    <section id="favs" class="favs">
-      <div class="flabel">favoritos</div>
-      <div id="favlist" class="favlist"></div>
-    </section>
-  </main>
+      <div class="row-actions">
+        <div class="engine" id="engine">
+          <button class="eng on" data-eng="neural">neural &#129504;</button>
+          <button class="eng" data-eng="silabas">s&iacute;labas</button>
+        </div>
+        <button id="fav" class="iconbtn" title="favoritar">&hearts;</button>
+        <button id="share" class="iconbtn" title="copiar link">&#128279;</button>
+      </div>
 
-  <footer>sílabas extraídas de ~268 mil palavras do português</footer>
+      <div class="controls">
+        <div class="field-row syl-only">
+          <label for="silabas">s&iacute;labas</label>
+          <select id="silabas">
+            <option value="0">aleat&oacute;rio</option>
+            <option value="2">2</option><option value="3">3</option>
+            <option value="4">4</option><option value="5">5</option>
+          </select>
+        </div>
+        <div class="field-row syl-only">
+          <label for="tipo">tipo</label>
+          <select id="tipo">
+            <option value="qualquer">qualquer</option>
+            <option value="substantivo">substantivo</option>
+            <option value="adjetivo">adjetivo</option>
+            <option value="verbo">verbo</option>
+          </select>
+        </div>
+        <div class="field-row neural-only">
+          <label for="temp">temperatura</label>
+          <input type="range" id="temp" min="0.3" max="1.5" step="0.1" value="0.9">
+          <span id="tempv">0.9</span>
+        </div>
+      </div>
 
-  <div id="toast" class="toast">copiado!</div>
+      <div class="genrow">
+        <button id="btn" class="default">&#127922; gerar palavra</button>
+        <button id="histToggle">hist&oacute;rico</button>
+      </div>
+
+      <fieldset class="viz">
+        <legend>a computa&ccedil;&atilde;o &#129504;</legend>
+        <div id="vizbody" class="vizbody sunken-panel"></div>
+      </fieldset>
+
+      <div id="favs" class="favs">
+        <div class="flabel">favoritos</div>
+        <div id="favlist" class="favlist"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- taskbar decorativa -->
+<div class="taskbar">
+  <button class="start">&#129750; Iniciar</button>
+  <div class="tray"><span id="clock">--:--</span></div>
+</div>
+
+<!-- modal "como funciona" -->
+<div id="overlay" class="overlay">
+  <div class="window dialog">
+    <div class="title-bar">
+      <div class="title-bar-text">Como funciona</div>
+      <div class="title-bar-controls"><button id="infoClose" aria-label="Close"></button></div>
+    </div>
+    <div class="window-body">
+      <p>Gerador de palavras que <b>ainda n&atilde;o existem</b> em portugu&ecirc;s &mdash; com dois motores.</p>
+      <p><b>&#129504; neural (padr&atilde;o):</b> uma mini-rede neural treinada em ~268 mil palavras, que inventa a palavra <b>letra por letra</b>, prevendo a pr&oacute;xima com base nas anteriores (mesma ideia do GPT, em mini). O painel "a computa&ccedil;&atilde;o" mostra as probabilidades que ela calcula a cada passo. A <b>temperatura</b> controla ousadia (baixa = seguro, alta = criativo/ca&oacute;tico).</p>
+      <p><b>s&iacute;labas:</b> sorteia s&iacute;labas reais (ponderadas por frequ&ecirc;ncia) e emenda.</p>
+      <ol>
+        <li>Descarta o que <b>j&aacute; existe</b> (compara com 433 mil palavras reais).</li>
+        <li>Descarta o que fica <b>impronunci&aacute;vel</b> e sorteia de novo.</li>
+        <li>&hearts; favorita, &#128279; gera link, e o <b>hist&oacute;rico</b> guarda a sess&atilde;o.</li>
+      </ol>
+      <p>Tudo roda <b>100&#37; no seu navegador</b>. A rede foi treinada com <b>tinygrad</b>.</p>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast window">copiado!</div>
+
+<script>
+(function () {
+  var clk = document.getElementById('clock');
+  function tick() { if (!clk) return; var d = new Date(); clk.textContent = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+  tick(); setInterval(tick, 15000);
+  var hc = document.getElementById('histClose'), sb = document.getElementById('sidebar');
+  if (hc && sb) hc.addEventListener('click', function () { sb.classList.remove('open'); });
+})();
+</script>
 
 <script src="data.js"></script>
 <script src="words.js"></script>
+<script src="model.js"></script>
 <script>
 (function () {
   var S = window.SYLLABLES || { ini: [], mid: [], fim: [] };
@@ -313,9 +299,50 @@
     if (/[bcdfgjklmnpqrstvxz]{3,}/.test(w)) return true;
     return false;
   }
+  // ---- motor neural: MLP char-level (pesos em window.NEURAL) ----
+  var NM = window.NEURAL || null;
+  var motor = 'silabas';
+  var selTemp = document.getElementById('temp');
+
+  function neuralWord() {
+    var V = NM.vocab.length, E = NM.n_emb, H = NM.n_hid, BL = NM.block, IN = BL * E;
+    var C = NM.C, W1 = NM.W1, b1 = NM.b1, W2 = NM.W2, b2 = NM.b2;
+    var temp = parseFloat(selTemp.value) || 0.9;
+    var ctx = []; for (var z = 0; z < BL; z++) ctx.push(0);
+    var out = '', trace = [];
+    for (var s = 0; s < 30; s++) {
+      // 1) embedding das BL letras do contexto, achatado em IN
+      var e = new Float64Array(IN);
+      for (var p = 0; p < BL; p++) { var c = ctx[p] * E; for (var k = 0; k < E; k++) e[p * E + k] = C[c + k]; }
+      // 2) camada escondida: h = tanh(W1·e + b1)
+      var h = new Float64Array(H);
+      for (var j = 0; j < H; j++) { var sum = b1[j], off = j * IN; for (var i = 0; i < IN; i++) sum += W1[off + i] * e[i]; h[j] = Math.tanh(sum); }
+      // 3) saída: logits = (W2·h + b2) / temperatura
+      var mx = -1e9, lg = new Float64Array(V);
+      for (var v = 0; v < V; v++) { var sm = b2[v], o2 = v * H; for (var jj = 0; jj < H; jj++) sm += W2[o2 + jj] * h[jj]; lg[v] = sm / temp; if (lg[v] > mx) mx = lg[v]; }
+      // 4) softmax + amostra a próxima letra
+      var tot = 0; for (var a = 0; a < V; a++) { lg[a] = Math.exp(lg[a] - mx); tot += lg[a]; }
+      var r = Math.random() * tot, acc = 0, ix = 0;
+      for (var bb = 0; bb < V; bb++) { acc += lg[bb]; if (acc >= r) { ix = bb; break; } }
+      // registra a "computação" deste passo: top-6 letras por probabilidade
+      var pr = []; for (var q = 0; q < V; q++) pr.push([q, lg[q] / tot]);
+      pr.sort(function (x, y) { return y[1] - x[1]; });
+      var topArr = pr.slice(0, 6).map(function (t) { return { c: t[0] === 0 ? '·' : NM.vocab[t[0]], p: t[1], on: t[0] === ix }; });
+      // garante que a letra escolhida apareça (mesmo fora do top-6)
+      if (!topArr.some(function (t) { return t.on; })) topArr.push({ c: ix === 0 ? '·' : NM.vocab[ix], p: lg[ix] / tot, on: true });
+      trace.push({ prefix: out || '·', top: topArr });
+      if (ix === 0) break;                    // '.' = fim da palavra
+      out += NM.vocab[ix];
+      ctx.shift(); ctx.push(ix);
+    }
+    return { w: out, parts: [], trace: trace };
+  }
+
   function gerar() {
-    var o = umaPalavra();
-    for (var t = 0; t < 80 && (existe(o.w) || feia(o.w)); t++) o = umaPalavra();
+    var make = (motor === 'neural' && NM) ? neuralWord : umaPalavra;
+    var o = make();
+    // re-sorteia enquanto: vazia/curta, já existe, ou impronunciável
+    for (var t = 0; t < 80 && (!o.w || o.w.length < 3 || existe(o.w) || feia(o.w)); t++) o = make();
     return o;
   }
 
@@ -332,6 +359,7 @@
   var histToggle = document.getElementById('histToggle');
   var histClear = document.getElementById('histClear');
   var histlistEl = document.getElementById('histlist');
+  var vizBody = document.getElementById('vizbody');
 
   var atual = { w: '', parts: [] };
   var toastTimer, spinTimer;
@@ -386,6 +414,29 @@
     renderHist();
   }
 
+  // ---- visualizador da computação (trace do neuralWord) ----
+  function renderViz(trace) {
+    if (!vizBody) return;
+    vizBody.innerHTML = '';
+    if (!trace || !trace.length) { vizBody.innerHTML = '<div class="vempty">troque pro motor neural e gere uma palavra</div>'; return; }
+    trace.forEach(function (st) {
+      var row = document.createElement('div'); row.className = 'vstep';
+      var ctxEl = document.createElement('div'); ctxEl.className = 'vctx'; ctxEl.textContent = st.prefix;
+      var bars = document.createElement('div'); bars.className = 'vbars';
+      st.top.forEach(function (t) {
+        var bar = document.createElement('div'); bar.className = 'vbar' + (t.on ? ' on' : '');
+        var ch = document.createElement('span'); ch.className = 'vch'; ch.textContent = t.c;
+        var track = document.createElement('span'); track.className = 'vtrack';
+        var fill = document.createElement('span'); fill.className = 'vfill'; fill.style.width = Math.max(2, Math.round(t.p * 100)) + '%';
+        track.appendChild(fill);
+        var pct = document.createElement('span'); pct.className = 'vp'; pct.textContent = Math.round(t.p * 100) + '%';
+        bar.appendChild(ch); bar.appendChild(track); bar.appendChild(pct);
+        bars.appendChild(bar);
+      });
+      row.appendChild(ctxEl); row.appendChild(bars); vizBody.appendChild(row);
+    });
+  }
+
   // ---- mostrar palavra (sem re-sortear) ----
   function mostra(o, pop) {
     atual = o;
@@ -396,6 +447,7 @@
     try { history.replaceState(null, '', '#' + encodeURIComponent(o.w)); } catch (e) { location.hash = encodeURIComponent(o.w); }
     updateHeart();
     renderHist();
+    renderViz(o.trace);
   }
 
   // ---- animação slot-machine, depois assenta na palavra final ----
@@ -432,6 +484,23 @@
   histToggle.addEventListener('click', function () { sidebar.classList.toggle('open'); });
   histClear.addEventListener('click', function () { historico = []; renderHist(); });
 
+  // seletor de motor (sílabas / neural) + slider de temperatura
+  var engineEl = document.getElementById('engine');
+  var stageEl = document.querySelector('.stage');
+  if (!NM) { var nb = engineEl.querySelector('[data-eng="neural"]'); nb.disabled = true; nb.style.opacity = .4; nb.title = 'modelo não carregou'; }
+  engineEl.addEventListener('click', function (e) {
+    var b = e.target.closest('.eng'); if (!b || b.disabled) return;
+    motor = b.getAttribute('data-eng');
+    for (var i = 0; i < engineEl.children.length; i++) engineEl.children[i].classList.toggle('on', engineEl.children[i] === b);
+    stageEl.classList.toggle('neural', motor === 'neural');
+    novo();
+  });
+  if (selTemp) {
+    var tempv = document.getElementById('tempv');
+    selTemp.addEventListener('input', function () { tempv.textContent = parseFloat(selTemp.value).toFixed(1); });
+    selTemp.addEventListener('change', novo);
+  }
+
   var overlay = document.getElementById('overlay');
   var infoToggle = document.getElementById('infoToggle');
   var infoClose = document.getElementById('infoClose');
@@ -449,6 +518,12 @@
   });
 
   // ---- início ----
+  if (NM) {   // IA é o motor padrão
+    motor = 'neural';
+    stageEl.classList.add('neural');
+    var _sb = engineEl.querySelector('[data-eng="silabas"]'); if (_sb) _sb.classList.remove('on');
+    var _nb = engineEl.querySelector('[data-eng="neural"]'); if (_nb) _nb.classList.add('on');
+  }
   renderFavs();
   renderHist();
   var h = '';
